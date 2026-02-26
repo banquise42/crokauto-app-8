@@ -269,8 +269,7 @@ padding:10px;
 /* ===========================
    MODE AUTO : LOCAL (ESP) ou EXTERIEUR (GitHub)
    =========================== */
-let lastStatusTime = Date.now();
-let offline = false; 
+
 const params = new URLSearchParams(window.location.search);
 const deviceID = params.get("id");
 const pairCode = params.get("key");
@@ -314,6 +313,9 @@ window.onload = () => {
   if(!LOCAL_MODE){
     loadMqttLibAndConnect();
   }
+  if(!LOCAL_MODE){
+  setOffline(true);
+}
 };
 
 /* ===========================
@@ -573,8 +575,6 @@ function saveEdit(){
    =========================== */
 function updateUI(j){
   if(!j) return;
-  lastStatusTime = Date.now();
-  setOffline(false);
   lastStatusTime = Date.now();
   setOffline(false);
 
