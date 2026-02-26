@@ -77,7 +77,17 @@ background:transparent;
 
 <body>
 <div class="top">🐾 CrokAuto 🐾</div>
-
+  
+<div id="offlineBanner" style="
+display:none;
+background:#c0392b;
+color:white;
+text-align:center;
+padding:8px;
+font-weight:bold;
+">
+⚠️ Appareil hors ligne
+</div>
 <div class="wrap">
 
 <div class="tabs">
@@ -259,6 +269,8 @@ padding:10px;
 /* ===========================
    MODE AUTO : LOCAL (ESP) ou EXTERIEUR (GitHub)
    =========================== */
+let lastStatusTime = Date.now();
+let offline = false; 
 const params = new URLSearchParams(window.location.search);
 const deviceID = params.get("id");
 const pairCode = params.get("key");
@@ -276,6 +288,8 @@ const LOCAL_MODE =
 let mqttReady = false;
 let mqttClient = null;
 let lastStatus = null;
+let offline = false;
+let lastStatusTime = 0;  
 
 let lampEditing = false;
 let scheduleEditing = false;
@@ -559,6 +573,10 @@ function saveEdit(){
    =========================== */
 function updateUI(j){
   if(!j) return;
+  lastStatusTime = Date.now();
+  setOffline(false);
+  lastStatusTime = Date.now();
+  setOffline(false);
 
   document.getElementById('status').innerText = j.state ?? "---";
   document.getElementById('weight').innerText = (j.weight!=null) ? Number(j.weight).toFixed(1) : "0";
@@ -602,9 +620,22 @@ setInterval(()=>{
   } else {
     // extérieur : on réaffiche ce qu'on a reçu MQTT
     if(lastStatus) updateUI(lastStatus);
+    if(lastStatusTime && (Date.now() - lastStatusTime > 6000)) setOffline(true);
   }
 }, 1000);
+  
+function setOffline(state){
+  if(state === offline) return;
+  offline = state;
 
+  const banner = document.getElementById("offlineBanner");
+  if(banner) banner.style.display = state ? "block" : "none";
+
+  document.querySelectorAll(".btn").forEach(b=>{
+    b.disabled = state;
+    b.style.opacity = state ? 0.5 : 1;
+  });
+}
 /* ===========================
    MQTT (extérieur uniquement)
    =========================== */
